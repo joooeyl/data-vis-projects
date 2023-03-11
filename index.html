@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <!--
+  index.html: p2 html
+  Copyright (C)  2022 University of Chicago. All rights reserved.
+
+  This is only for students and instructors in the 2022 CMSC 23900 ("DataVis") class, for use in
+  that class. It is not licensed for open-source or any other kind of re-distribution. Do not allow
+  this file to be copied or downloaded by anyone outside the 2022 DataVis class.
+  -->
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=" />
+    <title>DataVis'22 p2</title>
+    <style>
+      .bad {
+        background-color: rgb(255, 220, 220);
+      }
+      /* any static styling you want for parts A and B */
+      /* v.v.v.v.v.v.v.v.v.v.v.v.v.v.v  begin student code */
+      /* ^'^'^'^'^'^'^'^'^'^'^'^'^'^'^  end student code (4L in ref) */
+    </style>
+  </head>
+
+  <body>
+    <div id="cksum"></div>
+    <div id="partAdiv"><!-- your part A vis goes here --></div>
+    <hr />
+    <div id="partBdiv"><!-- your part B vis goes here --></div>
+  </body>
+
+  <script type="module">
+    import { d3 } from './common.js';
+    import { cksum } from './cksum.js';
+    import { partA } from './partA.js';
+    import { partB } from './partB.js';
+    /* 1.83 is the aspect ratio of the original
+    (https://en.wikipedia.org/wiki/File:Nightingale-mortality.jpg) so that is an appropriate aspect
+    ratio for the partA recreation.  Somewhat arbitrarily, the same aspect ratio is a constraint for
+    your partB as well. */
+    let aspect = 1.83,
+      width = 1100,
+      height = Math.round(width / aspect);
+    ['A', 'B'].map((X) =>
+      d3
+        .select(`#part${X}div`)
+        .append('svg')
+        .attr('id', `part${X}`)
+        .attr('width', width)
+        .attr('height', height)
+    );
+    d3.csv('nightingale.csv').then((data) => {
+      /* these are called after the data is read, which happens asynchronously (the .then callback
+      is called when the promise of the data read has resolved) */
+      partA('partA', data);
+      partB('partB', data);
+    });
+    {
+      let oops = false;
+      const div = document.querySelector('#cksum');
+      function ckReport(name, got, want) {
+        if (got != want) {
+          oops = true;
+          div.innerHTML += `cksum(${name}) == ${got} but wanted ${want}<br>`;
+        }
+      }
+      const msg =
+        "This means that you (or your editor's auto-formatter) modified something outside<br> " +
+        'the student code blocks.  See if you can undo recent changes, or work from a<br> ' +
+        'pristine copy of files from ../datavis22/work/p2';
+      Promise.all([
+        cksum('./cksum.js').then((crc) => ckReport('cksum.js', crc, 2671524440)),
+        cksum('./common.js').then((crc) => ckReport('common.js', crc, 1224466962)),
+        cksum('./partA.js').then((crc) => ckReport('partA.js', crc, 2016252028)),
+        cksum('./partB.js').then((crc) => ckReport('partB.js', crc, 3941813930)),
+        cksum('./index.html').then((crc) => ckReport('index.html', crc, 3278320941)),
+      ]).then(() => {
+        if (oops) div.innerHTML += msg;
+        div.classList.add('bad');
+      });
+    }
+  </script>
+</html>
